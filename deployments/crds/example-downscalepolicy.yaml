@@ -1,0 +1,23 @@
+apiVersion: downscaler.io/v1
+kind: DownscalePolicy
+metadata:
+  name: example-policy
+  namespace: default
+  annotations:
+    # Standard downscaler annotations also work on DownscalePolicies
+    downscaler/grace-period: "5m"
+spec:
+  # Define when to scale down (workday evenings and weekends)
+  downtime: "Mon-Fri 19:00-08:00 UTC,Sat-Sun 00:00-23:59 UTC"
+  
+  # Define when to scale up (workday business hours)
+  uptime: "Mon-Fri 08:00-19:00 UTC"
+  
+  # Scale down to 0 replicas
+  downscaleReplicas: 0
+  
+  # Wait 10 minutes before first scaling
+  gracePeriod: "10m"
+  
+  # Exclude during maintenance windows
+  exclude: "Sat 02:00-04:00 UTC"

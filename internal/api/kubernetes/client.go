@@ -18,6 +18,7 @@ import (
 	zalando "github.com/zalando-incubator/stackset-controller/pkg/clientset"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 )
@@ -87,6 +88,11 @@ func NewClient(kubeconfig string, dryRun bool) (client, error) {
 	clientsets.Monitoring, err = monitoring.NewForConfig(config)
 	if err != nil {
 		return kubeclient, fmt.Errorf("failed to get clientset for monitoring resources: %w", err)
+	}
+
+	clientsets.Dynamic, err = dynamic.NewForConfig(config)
+	if err != nil {
+		return kubeclient, fmt.Errorf("failed to get dynamic client: %w", err)
 	}
 
 	kubeclient.clientsets = &clientsets

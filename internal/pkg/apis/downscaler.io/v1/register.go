@@ -1,0 +1,16 @@
+package v1
+
+import (
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
+
+// GroupVersion is the group version used to register these objects
+var GroupVersion = schema.GroupVersion{Group: "downscaler.io", Version: "v1"}
+
+// SchemeGroupVersion is group version used to register these objects
+var SchemeGroupVersion = GroupVersion
+
+// Resource takes an unqualified resource and returns a Group qualified GroupResource
+func Resource(resource string) schema.GroupResource {
+	return GroupVersion.WithResource(resource).GroupResource()
+}
