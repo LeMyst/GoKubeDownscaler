@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/caas-team/gokubedownscaler/internal/pkg/values"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -25,9 +26,25 @@ var downscalePolicyGVR = schema.GroupVersionResource{
 
 // getDownscalePolicies is the getResourceFunc for DownscalePolicies.
 func getDownscalePolicies(namespace string, clientsets *Clientsets, ctx context.Context) ([]Workload, error) {
-	// For now, return empty list since we need dynamic client support first
-	// This is a placeholder implementation
-	return []Workload{}, nil
+	if clientsets.Dynamic == nil {
+		// If dynamic client is not available, return empty list
+		return []Workload{}, nil
+	}
+
+	policies, err := clientsets.Dynamic.Resource(downscalePolicyGVR).Namespace(namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get downscale policies: %w", err)
+	}
+
+	results := make([]Workload, 0, len(policies.Items))
+	for i := range policies.Items {
+		results = append(results, &downscalePolicy{
+			Unstructured:  &policies.Items[i],
+			dynamicClient: clientsets.Dynamic,
+		})
+	}
+
+	return results, nil
 }
 
 // downscalePolicy is a wrapper for DownscalePolicy to implement the Workload interface.
@@ -52,13 +69,30 @@ func (d *downscalePolicy) SetAnnotations(annotations map[string]string) {
 
 // Update updates the DownscalePolicy resource.
 func (d *downscalePolicy) Update(clientsets *Clientsets, ctx context.Context) error {
-	// For now, just return nil since we need dynamic client support
+	if d.dynamicClient == nil {
+		return fmt.Errorf("dynamic client not available")
+	}
+
+	_, err := d.dynamicClient.Resource(downscalePolicyGVR).Namespace(d.GetNamespace()).Update(ctx, d.Unstructured, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to update downscale policy: %w", err)
+	}
+
 	return nil
 }
 
 // Reget regets the DownscalePolicy from the Kubernetes API.
 func (d *downscalePolicy) Reget(clientsets *Clientsets, ctx context.Context) error {
-	// For now, just return nil since we need dynamic client support
+	if d.dynamicClient == nil {
+		return fmt.Errorf("dynamic client not available")
+	}
+
+	policy, err := d.dynamicClient.Resource(downscalePolicyGVR).Namespace(d.GetNamespace()).Get(ctx, d.GetName(), metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get downscale policy: %w", err)
+	}
+
+	*d.Unstructured = *policy
 	return nil
 }
 
