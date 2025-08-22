@@ -37,6 +37,14 @@ Scales by setting the node selector to match none of the nodes, which stops pods
 
 Scales by setting the replica count to the [downscale replicas](ref:docs-values#downscale-replicas).
 
+### DownscalePolicies
+
+- id: downscalepolicies
+- resource: downscalepolicy.v1.downscaler.io
+
+Scales by updating the status phase field to indicate current scaling state.
+This is a custom resource specifically designed to manage downscaling policies with built-in support for downtime and uptime parameters.
+
 ### HPAs
 
 - id: horizontalpodautoscalers
@@ -99,3 +107,11 @@ Scales by setting the replica count to the [downscale replicas](ref:docs-values#
 - resource: prometheus.v1.monitoring.coreos.com
 
 Scales by setting the replica count to the [downscale replicas](ref:docs-values#downscale-replicas).
+
+### DownscalePolicies
+
+- id: downscalepolicies
+- resource: downscalepolicy.v1.downscaler.io
+
+Scales by updating the status phase field to indicate current scaling state.
+This is a custom resource specifically designed to manage downscaling policies with built-in support for downtime and uptime parameters.

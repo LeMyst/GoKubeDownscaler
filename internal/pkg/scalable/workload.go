@@ -32,6 +32,7 @@ func GetWorkloads(resource, namespace string, clientsets *Clientsets, ctx contex
 		"rollouts":                 getRollouts,
 		"stacks":                   getStacks,
 		"prometheuses":             getPrometheuses,
+		"downscalepolicies":        getDownscalePolicies,
 	}
 
 	resourceFunc, exists := resourceFuncMap[resource]
